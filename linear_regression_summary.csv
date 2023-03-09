@@ -1,0 +1,20 @@
+                      OLS Regression Results                      
+Dep. Variable:   ,VIX             ,  R-squared:         ,   0.470 
+Model:           ,OLS             ,  Adj. R-squared:    ,   0.470 
+Method:          ,Least Squares   ,  F-statistic:       ,   2337. 
+Date:            ,Thu, 09 Mar 2023,  Prob (F-statistic):,  0.00   
+Time:            ,14:32:40        ,  Log-Likelihood:    , -8180.0 
+No. Observations:,  2640          ,  AIC:               ,1.636e+04
+Df Residuals:    ,  2638          ,  BIC:               ,1.638e+04
+Df Model:        ,     1          ,                     ,         
+Covariance Type: ,nonrobust       ,                     ,         
+     ,   coef   , std err ,    t    ,P>|t| ,  [0.025 ,  0.975] 
+const,  -13.1442,    0.645,  -20.383, 0.000,  -14.409,  -11.880
+VVIX ,    0.3324,    0.007,   48.341, 0.000,    0.319,    0.346
+Omnibus:      ,587.333,  Durbin-Watson:     ,   0.059
+Prob(Omnibus):, 0.000 ,  Jarque-Bera (JB):  ,1600.641
+Skew:         , 1.169 ,  Prob(JB):          ,    0.00
+Kurtosis:     , 6.014 ,  Cond. No.          ,    579.
+
+Notes:
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
