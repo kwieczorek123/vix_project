@@ -4,16 +4,37 @@ from statsmodels.tsa.stattools import grangercausalitytests
 import yfinance as yf
 import csv
 
-# download and clean the data
-data_vix = yf.download("^VIX", start="2010-01-01", end="2023-02-28", interval="1d")
-data_vvix = yf.download("^VVIX", start="2010-01-01", end="2023-02-28", interval="1d")
-close_df = pd.concat([data_vix['Close'], data_vvix['Close']], axis=1)
-close_df.columns = ['VIX', 'VVIX']
-close_df.dropna(inplace=True)
+# Define the symbol we aim to predict
+predicted_symbol = '^VIX'
+
+# Define list of symbols to use as predictors
+symbols_list = ['^VVIX', 'SPY', 'XLP', 'GLD', 'USO']
+
+# Define dictionary of relative symbols to create
+relative_dict = {'SPY': 'XLP', 'GLD': 'USO'}
+
+# Download data for symbols
+data_list = []
+for symbol in predictor_symbols + [predicted_symbol]:
+    data = yf.download(symbol, start="2010-01-01", end="2023-02-28", interval="1d")
+    data_list.append(data['Close'].rename(symbol))
+
+# Merge data into a single DataFrame
+data = pd.concat(data_list, axis=1)
+
+# Assert that the number of predictor variables matches the number of columns in the training data
+assert len(predictor_symbols) + 1 == len(data.columns), "Number of predictor variables does not match number of columns in training data"
+
+# Calculate relative symbols
+for symbol, relative_symbol in relative_dict.items():
+    data[symbol+'/'+relative_symbol] = data[symbol] / data[relative_symbol]
+
+# Remove any missing or infinite values
+data = data.replace([np.inf, -np.inf], np.nan).dropna()
 
 # set max lag and run Granger causality test
 maxlag = 30
-test_results = grangercausalitytests(close_df, maxlag=maxlag, verbose=False)
+test_results = grangercausalitytests(data, maxlag=maxlag, verbose=False)
 
 # create a list to hold the results
 results = []

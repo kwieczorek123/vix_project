@@ -1,9 +1,8 @@
-import yfinance as yf
 import pandas as pd
 import numpy as np
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import GradientBoostingRegressor
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import r2_score, mean_squared_error
+import yfinance as yf
 
 # Define the symbol we aim to predict
 predicted_symbol = '^VIX'
@@ -30,19 +29,24 @@ for symbol, relative_symbol in relative_dict.items():
 # Remove any missing or infinite values
 data = data.replace([np.inf, -np.inf], np.nan).dropna()
 
+# Split into training and testing sets
+train_data = data.iloc[:int(0.8 * len(data)), :]
+test_data = data.iloc[int(0.8 * len(data)):, :]
+
 # Initialize variables to store evaluation results
 r2_scores = []
 mse_scores = []
 
 # Fit and evaluate model 100 times
 for i in range(100):
-    # Split into training and testing sets
-    X_train, X_test, y_train, y_test = train_test_split(data[predictor_symbols], data[predicted_symbol], test_size=0.2, random_state=i)
-
-    # Fit Gradient Boosting Regression model
-    model = GradientBoostingRegressor(random_state=i).fit(X_train, y_train)
+    # Fit Random Forest Regression model
+    X_train = train_data.drop(predicted_symbol, axis=1)
+    y_train = train_data[predicted_symbol]
+    model = RandomForestRegressor(n_estimators=100, max_depth=5, random_state=i).fit(X_train, y_train)
 
     # Predict using the model
+    X_test = test_data.drop(predicted_symbol, axis=1)
+    y_test = test_data[predicted_symbol]
     predictions = model.predict(X_test)
 
     # Evaluate model performance

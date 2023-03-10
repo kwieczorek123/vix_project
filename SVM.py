@@ -1,9 +1,9 @@
 import yfinance as yf
-import pandas as pd
 import numpy as np
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import GradientBoostingRegressor
+import pandas as pd
+from sklearn.svm import SVR
 from sklearn.metrics import r2_score, mean_squared_error
+from sklearn.model_selection import train_test_split
 
 # Define the symbol we aim to predict
 predicted_symbol = '^VIX'
@@ -30,25 +30,33 @@ for symbol, relative_symbol in relative_dict.items():
 # Remove any missing or infinite values
 data = data.replace([np.inf, -np.inf], np.nan).dropna()
 
-# Initialize variables to store evaluation results
+# Separate the VIX data
+vix_data = data.pop(predicted_symbol)
+
+# Initialize arrays to store performance metrics
 r2_scores = []
 mse_scores = []
 
-# Fit and evaluate model 100 times
+# Loop SVM model and evaluation for 100 iterations
 for i in range(100):
     # Split into training and testing sets
-    X_train, X_test, y_train, y_test = train_test_split(data[predictor_symbols], data[predicted_symbol], test_size=0.2, random_state=i)
+    X_train, X_test, y_train, y_test = train_test_split(data, vix_data, test_size=0.2)
 
-    # Fit Gradient Boosting Regression model
-    model = GradientBoostingRegressor(random_state=i).fit(X_train, y_train)
+    # Fit SVM model
+    model = SVR(kernel='rbf', C=100, gamma=0.1, epsilon=.1)
+    model.fit(X_train, y_train)
 
     # Predict using the model
     predictions = model.predict(X_test)
 
     # Evaluate model performance
-    r2_scores.append(r2_score(y_test, predictions))
-    mse_scores.append(mean_squared_error(y_test, predictions))
+    r2 = r2_score(y_test, predictions)
+    mse = mean_squared_error(y_test, predictions)
 
-# Print average evaluation results
+    # Append performance metrics to arrays
+    r2_scores.append(r2)
+    mse_scores.append(mse)
+
+# Print average performance metrics
 print("Average R-squared: ", np.mean(r2_scores))
-print("Average Mean Squared Error: ", np.mean(mse_scores))
+print("Average Mean squared error: ", np.mean(mse_scores))
