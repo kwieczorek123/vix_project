@@ -8,10 +8,10 @@ import yfinance as yf
 predicted_symbol = '^VIX'
 
 # Define list of symbols to use as predictors
-predictor_symbols = ['^VVIX', 'SPY', 'XLP', 'GLD', 'USO', 'PKW', 'VYM']
+predictor_symbols = ['^VVIX', 'SPY', 'XLP', 'PKW', 'VYM']
 
 # Define dictionary of relative symbols to create
-relative_dict = {'SPY': 'XLP', 'GLD': 'USO', 'PKW': 'VYM'}
+relative_dict = {'SPY': 'XLP', 'PKW': 'VYM'}
 
 # Download data for symbols
 data_list = []

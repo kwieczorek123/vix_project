@@ -1,28 +1,26 @@
                       OLS Regression Results                      
-Dep. Variable:   ,^VIX            ,  R-squared:         ,   0.751 
-Model:           ,OLS             ,  Adj. R-squared:    ,   0.751 
-Method:          ,Least Squares   ,  F-statistic:       ,   1136. 
-Date:            ,Fri, 10 Mar 2023,  Prob (F-statistic):,  0.00   
-Time:            ,15:18:02        ,  Log-Likelihood:    , -7180.9 
-No. Observations:,  2640          ,  AIC:               ,1.438e+04
-Df Residuals:    ,  2632          ,  BIC:               ,1.442e+04
-Df Model:        ,     7          ,                     ,         
+Dep. Variable:   ,^VIX            ,  R-squared:         ,   0.744 
+Model:           ,OLS             ,  Adj. R-squared:    ,   0.743 
+Method:          ,Least Squares   ,  F-statistic:       ,   1527. 
+Date:            ,Mon, 13 Mar 2023,  Prob (F-statistic):,  0.00   
+Time:            ,13:13:43        ,  Log-Likelihood:    , -7221.0 
+No. Observations:,  2640          ,  AIC:               ,1.445e+04
+Df Residuals:    ,  2634          ,  BIC:               ,1.449e+04
+Df Model:        ,     5          ,                     ,         
 Covariance Type: ,nonrobust       ,                     ,         
      ,   coef   , std err ,    t    ,P>|t| ,  [0.025 ,  0.975] 
-const,   21.9633,    1.567,   14.012, 0.000,   18.890,   25.037
-^VVIX,    0.2712,    0.006,   46.127, 0.000,    0.260,    0.283
-SPY  ,    0.1796,    0.008,   21.457, 0.000,    0.163,    0.196
-XLP  ,    0.0567,    0.038,    1.498, 0.134,   -0.018,    0.131
-GLD  ,    0.0117,    0.005,    2.250, 0.025,    0.002,    0.022
-USO  ,   -0.0185,    0.002,   -8.805, 0.000,   -0.023,   -0.014
-PKW  ,    0.3270,    0.064,    5.121, 0.000,    0.202,    0.452
-VYM  ,   -1.2347,    0.048,  -25.636, 0.000,   -1.329,   -1.140
-Omnibus:      ,1030.844,  Durbin-Watson:     ,   0.102
-Prob(Omnibus):, 0.000  ,  Jarque-Bera (JB):  ,6883.174
-Skew:         , 1.699  ,  Prob(JB):          ,    0.00
-Kurtosis:     ,10.143  ,  Cond. No.          ,7.27e+03
+const,   10.2534,    0.803,   12.774, 0.000,    8.679,   11.827
+^VVIX,    0.2897,    0.006,   52.338, 0.000,    0.279,    0.301
+SPY  ,    0.1989,    0.007,   26.838, 0.000,    0.184,    0.213
+XLP  ,    0.2717,    0.029,    9.315, 0.000,    0.214,    0.329
+PKW  ,    0.0976,    0.056,    1.747, 0.081,   -0.012,    0.207
+VYM  ,   -1.1671,    0.048,  -24.170, 0.000,   -1.262,   -1.072
+Omnibus:      ,978.470,  Durbin-Watson:     ,   0.106
+Prob(Omnibus):, 0.000 ,  Jarque-Bera (JB):  ,5889.845
+Skew:         , 1.634 ,  Prob(JB):          ,    0.00
+Kurtosis:     , 9.547 ,  Cond. No.          ,2.73e+03
 
 Notes:
 [1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
-[2] The condition number is large, 7.27e+03. This might indicate that there are
+[2] The condition number is large, 2.73e+03. This might indicate that there are
 strong multicollinearity or other numerical problems.

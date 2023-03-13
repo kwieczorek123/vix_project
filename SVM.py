@@ -9,10 +9,10 @@ from sklearn.model_selection import train_test_split
 predicted_symbol = '^VIX'
 
 # Define list of symbols to use as predictors
-predictor_symbols = ['^VVIX', 'SPY', 'XLP', 'GLD', 'USO', 'PKW', 'VYM']
+predictor_symbols = ['^VVIX', 'SPY', 'XLP', 'PKW', 'VYM']
 
 # Define dictionary of relative symbols to create
-relative_dict = {'SPY': 'XLP', 'GLD': 'USO', 'PKW': 'VYM'}
+relative_dict = {'SPY': 'XLP', 'PKW': 'VYM'}
 
 # Download data for symbols
 data_list = []
@@ -37,8 +37,8 @@ vix_data = data.pop(predicted_symbol)
 r2_scores = []
 mse_scores = []
 
-# Loop SVM model and evaluation for 100 iterations
-for i in range(100):
+# Loop SVM model and evaluation for 10 iterations
+for i in range(10):
     # Split into training and testing sets
     X_train, X_test, y_train, y_test = train_test_split(data, vix_data, test_size=0.2)
 
