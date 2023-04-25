@@ -6,6 +6,13 @@ from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.metrics import r2_score, mean_squared_error
 import matplotlib.pyplot as plt
 
+
+def get_monthly_data(symbol, start, end):
+    data = yf.download(symbol, start=start, end=end)
+    data = data['Close'].resample('M').last()
+    return data.rename(symbol)
+
+
 # Define the symbol we aim to predict
 predicted_symbol = '^VIX'
 
@@ -18,8 +25,8 @@ relative_dict = {'SPY': 'XLP', 'PKW': 'VYM'}
 # Download data for training
 train_data_list = []
 for symbol in predictor_symbols + [predicted_symbol]:
-    data = yf.download(symbol, start="2007-01-01", end="2019-12-31", interval="1d")
-    train_data_list.append(data['Close'].rename(symbol))
+    data = get_monthly_data(symbol, start="2007-01-01", end="2021-12-31")
+    train_data_list.append(data)
 
 # Merge data into a single DataFrame and rename columns
 train_data = pd.concat(train_data_list, axis=1)
@@ -38,8 +45,8 @@ model = GradientBoostingRegressor(random_state=42).fit(train_data[predictor_symb
 # Download data for testing
 test_data_list = []
 for symbol in predictor_symbols + [predicted_symbol]:
-    data = yf.download(symbol, start="2020-01-01", end="2023-03-10", interval="1d")
-    test_data_list.append(data['Close'].rename(symbol))
+    data = get_monthly_data(symbol, start="2022-01-01", end="2023-03-31")
+    test_data_list.append(data)
 
 # Merge data into a single DataFrame and rename columns
 test_data = pd.concat(test_data_list, axis=1)
@@ -75,31 +82,6 @@ correct_predictions = downward_actual[:-1] == downward_forecast[:-1]
 percentage_downward_correct = np.mean(correct_predictions) * 100
 print('Percentage of correct downward predictions: {:.2f}%'.format(percentage_downward_correct))
 
-roll_period = 21
-
-# Calculate percentage change of VIX
-test_data['VIX_change'] = test_data[predicted_symbol].pct_change()
-
-# Calculate percentage change of forecasted VIX
-test_data['forecasted_VIX_change'] = test_data['forecasted_VIX'].pct_change()
-
-# Create a column to indicate upward moves of at least 50% within a maximum of 21 time periods (rows)
-test_data['upward_move'] = (test_data[predicted_symbol].rolling(21).max() / test_data[predicted_symbol]) <= 0.5
-
-# Create a column to indicate if the forecast correctly predicted the upward move
-test_data['upward_correct'] = np.where(
-    (test_data['VIX_change'] > 0.5) & (test_data['forecasted_VIX_change'] > 0.25 * test_data['VIX_change']), 1, 0)
-
-# Calculate the percentage of correct upward predictions
-upward_move_sum = test_data['upward_move'].sum()
-if upward_move_sum > 0:
-    percentage_major_upward_correct = 100 * test_data['upward_correct'].sum() / upward_move_sum
-else:
-    percentage_major_upward_correct = 0
-
-# Print the percentage of correct upward predictions
-print('Percentage of Correct Major Upward Predictions: {:.2f}%'.format(percentage_major_upward_correct))
-
 # Plot forecasted VIX and actual VIX on one chart
 fig, ax = plt.subplots(figsize=(10, 5))
 ax.plot(test_data.index, test_data[predicted_symbol], label='Actual VIX')
@@ -118,5 +100,5 @@ plt.text(test_data.index[0], np.max(test_data[predicted_symbol]) * 0.85,
          'Upward Correct: {:.2f}%'.format(percentage_upward_correct), fontsize=6)
 plt.text(test_data.index[0], np.max(test_data[predicted_symbol]) * 0.8,
          'Downward Correct: {:.2f}%'.format(percentage_downward_correct), fontsize=6)
-plt.savefig('gradient_VIX.png')
+plt.savefig('gradient_VIX_monthly.png')
 plt.show()

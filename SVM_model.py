@@ -1,6 +1,7 @@
 import yfinance as yf
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 from sklearn.svm import SVR
 from sklearn.metrics import r2_score, mean_squared_error
 
@@ -37,7 +38,7 @@ model.fit(train_data[predictor_symbols], train_data[predicted_symbol])
 # Download data for testing
 test_data_list = []
 for symbol in predictor_symbols + [predicted_symbol]:
-    data = yf.download(symbol, start="2020-01-01", end="2023-03-10", interval="1d")
+    data = yf.download(symbol, start="2020-01-01", end="2023-03-31", interval="1d")
     test_data_list.append(data['Close'].rename(symbol))
 
 # Merge data into a single DataFrame and rename columns
@@ -57,3 +58,18 @@ test_data['forecasted_VIX'] = model.predict(test_data[predictor_symbols])
 # Calculate correlation coefficient
 corr_coef = np.corrcoef(test_data[predicted_symbol], test_data['forecasted_VIX'])[0, 1]
 print('Correlation Coefficient: {:.2f}'.format(corr_coef))
+
+# Plot forecasted VIX and actual VIX on one chart
+fig, ax = plt.subplots(figsize=(10, 5))
+ax.plot(test_data.index, test_data[predicted_symbol], label='Actual VIX')
+ax.plot(test_data.index, test_data['forecasted_VIX'], label='Forecasted VIX')
+ax.set_xlabel('Date')
+ax.set_ylabel('VIX')
+ax.set_title('Forecasted VIX vs Actual VIX\nCorrelation Coefficient: {:.2f}'.format(corr_coef))
+ax.legend()
+
+# Add correlation coefficient to chart as text annotation
+plt.text(test_data.index[0], np.max(test_data[predicted_symbol]) * 0.95,
+         'Correlation Coefficient: {:.2f}'.format(corr_coef), fontsize=8)
+
+plt.show()
