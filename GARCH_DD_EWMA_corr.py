@@ -56,12 +56,14 @@ for symbol in symbols:
     garch_res_lr = garch_model_lr.fit(update_freq=5)
     garch_vol_lr = garch_res_lr.conditional_volatility
 
+    corr_dict = {'Symbol': symbol}
+
     # Loop over frequencies
     for f in freq:
         # Resample data to specified frequency
         data_f = data['Adj Close'].resample(f).last().dropna()
 
-        # Compute absolute log returns
+        # Compute absolute log returns for the specified frequency
         abs_log_returns = abs(np.log(data_f).diff().dropna())
 
         # Compute GARCH(1,1) volatility based on absolute log returns
@@ -82,7 +84,7 @@ for symbol in symbols:
         df = pd.DataFrame({
             'Price': data_f,
             'Absolute Log Return': abs_log_returns,
-            'GARCH(1,1) Log Returns': garch_vol_lr.reindex(abs_log_returns.index, method='nearest'),
+            'GARCH(1,1) Log Returns': garch_vol_lr.reindex(abs_log_returns.index),
             'GARCH(1,1) Absolute Log Returns': garch_vol_alr,
             'DD-EWMA Forecasted Volatility': pd.Series(forecasted_volatility, index=abs_log_returns.index),
             'DD-EWMA RMSE': pd.Series(ddewma_rmse, index=abs_log_returns.index)
@@ -98,25 +100,22 @@ for symbol in symbols:
         df['Corr(Abs Log Return, GARCH Abs Log Returns)'] = corr_garch_alr
         df['Corr(Abs Log Return, DD-EWMA Forecasted Volatility)'] = corr_ddewma_fv
 
-        # Append the correlation coefficients for the current symbol and frequency to the DataFrame
-        corr_df = corr_df.append({
-            'Symbol': symbol,
-            'Frequency': f,
-            'Abs_Log_Return_vs_GARCH_Log_Returns': corr_garch_lr,
-            'Abs Log Return, GARCH Abs Log Returns': corr_garch_alr,
-            'Abs_Log_Return_vs_DD_EWMA': corr_ddewma_fv
-        }, ignore_index=True)
+        # Calculate correlation coefficients without the first cut_t rows
+        corr_abs_log_return_vs_garch_log_returns = abs_log_returns[cut_t:].corr(corr_garch_lr[cut_t:])
+        corr_abs_log_return_vs_garch_abs_log_returns = abs_log_returns[cut_t:].corr(corr_garch_alr[cut_t:])
+        corr_abs_log_return_vs_dd_ewma = abs_log_returns[cut_t:].corr(
+            pd.Series(forecasted_volatility, index=abs_log_returns.index)[cut_t:])
+
+        # Store the correlation coefficients in the dictionary for the current frequency
+        corr_dict[f'Abs_Log_Return_vs_GARCH_Log_Returns_{f}'] = corr_abs_log_return_vs_garch_log_returns
+        corr_dict[f'Abs_Log_Return_vs_DD_EWMA_{f}'] = corr_abs_log_return_vs_dd_ewma
 
         # Save to CSV
         filename = f'{symbol}_{f}.csv'
         df.to_csv(filename)
 
-# Save the correlation coefficients DataFrame to a CSV file
-corr_df.to_csv('correlation_coefficients.csv', index=False)
+        # Append the correlation coefficients for the current symbol to the DataFrame
+        corr_df = corr_df.append(corr_dict, ignore_index=True)
 
-"""
-based on correlation coefficient, the best models for each timeframe are:
-1D -> DD_EWMA (0.28 on avg)
-1W -> GARCH Abs Log Returns (0.24 on avg)
-1M -> GARCH Log Returns (0.39 on avg)
-"""
+        # Save the correlation coefficients DataFrame to a CSV file
+        corr_df.to_csv('correlation_coefficients.csv', index=False)

@@ -61,18 +61,26 @@ for symbol in symbols:
         # Resample data to specified frequency
         data_f = data['Adj Close'].resample(f).last().dropna()
 
-        # Compute absolute log returns
-        abs_log_returns = abs(np.log(data_f).diff().dropna())
+        # Compute log returns for the specified frequency
+        log_returns_f = np.log(data_f).diff().dropna()
 
-        # Compute GARCH(1,1) volatility based on absolute log returns
-        garch_model_alr = arch_model(abs_log_returns, p=1, q=1)
-        garch_res_alr = garch_model_alr.fit(update_freq=5)
-        garch_vol_alr = garch_res_alr.conditional_volatility
+        # Compute absolute log returns for the specified frequency
+        abs_log_returns_f = abs(log_returns_f)
+
+        # Compute GARCH(1,1) volatility based on log returns for the specified frequency
+        garch_model_lr_f = arch_model(log_returns_f, p=1, q=1)
+        garch_res_lr_f = garch_model_lr_f.fit(update_freq=5)
+        garch_vol_lr_f = garch_res_lr_f.conditional_volatility
+
+        # Compute GARCH(1,1) volatility based on absolute log returns for the specified frequency
+        garch_model_alr_f = arch_model(abs_log_returns_f, p=1, q=1)
+        garch_res_alr_f = garch_model_alr_f.fit(update_freq=5)
+        garch_vol_alr_f = garch_res_alr_f.conditional_volatility
 
         # Calculate the forecasted volatility and RMSE for each date using the DD_volatility() function
         forecasted_volatility = [np.nan] * cut_t
         ddewma_rmse = [np.nan] * cut_t
-        for i in range(len(abs_log_returns) - cut_t):
+        for i in range(len(abs_log_returns_f) - cut_t):
             log_returns_window = log_returns[i:cut_t + i]
             vol_forecast, RMSE = DD_volatility(log_returns_window, cut_t, alpha)
             forecasted_volatility.append(vol_forecast[0])
@@ -81,11 +89,11 @@ for symbol in symbols:
         # Combine into DataFrame
         df = pd.DataFrame({
             'Price': data_f,
-            'Absolute Log Return': abs_log_returns,
-            'GARCH(1,1) Log Returns': garch_vol_lr.reindex(abs_log_returns.index, method='nearest'),
-            'GARCH(1,1) Absolute Log Returns': garch_vol_alr,
-            'DD-EWMA Forecasted Volatility': pd.Series(forecasted_volatility, index=abs_log_returns.index),
-            'DD-EWMA RMSE': pd.Series(ddewma_rmse, index=abs_log_returns.index)
+            'Absolute Log Return': abs_log_returns_f,
+            'GARCH(1,1) Log Returns': garch_vol_lr_f,
+            'GARCH(1,1) Absolute Log Returns': garch_vol_alr_f,
+            'DD-EWMA Forecasted Volatility': pd.Series(forecasted_volatility, index=abs_log_returns_f.index),
+            'DD-EWMA RMSE': pd.Series(ddewma_rmse, index=abs_log_returns_f.index)
         })
 
         # Calculate correlation coefficients
@@ -117,6 +125,6 @@ corr_df.to_csv('correlation_coefficients.csv', index=False)
 """
 based on correlation coefficient, the best models for each timeframe are:
 1D -> DD_EWMA (0.28 on avg)
-1W -> GARCH Abs Log Returns (0.24 on avg)
-1M -> GARCH Log Returns (0.39 on avg)
+1W -> GARCH Log Returns (0.26 on avg)
+1M -> GARCH Abs Log Returns (0.21 on avg)
 """
